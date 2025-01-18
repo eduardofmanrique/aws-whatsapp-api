@@ -17,7 +17,7 @@ terraform {
   }
 }
 
-resource "aws_iam_role" "lambda_role" {
+resource "aws_iam_role" "lambda_role_whatsapp_api" {
   name               = "lambda-basic-role-whatsapp-api"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -33,23 +33,23 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-resource "aws_iam_policy_attachment" "lambda_basic_policy" {
+resource "aws_iam_policy_attachment" "lambda_basic_policy_whatsapp_api" {
   name       = "lambda-basic-policy-attachment-whatsapp-api"
-  roles      = [aws_iam_role.lambda_role.name]
+  roles      = [aws_iam_role.lambda_role_whatsapp_api.name]
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_policy_attachment" "lambda_sqs_full_access" {
+resource "aws_iam_policy_attachment" "lambda_sqs_full_access_whatsapp_api" {
   name       = "lambda-sqs-full-access-attachment-whatsapp-api"
-  roles      = [aws_iam_role.lambda_role.name]
+  roles      = [aws_iam_role.lambda_role_whatsapp_api.name]
   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 }
 
 
 
-resource "aws_lambda_function" "example" {
+resource "aws_lambda_function" "lambda_whatsapp_api" {
   function_name = "lambda-whatsapp-api"
-  role          = aws_iam_role.lambda_role.arn
+  role          = aws_iam_role.lambda_role_whatsapp_api.arn
   handler       = "main.handler"
   runtime       = "python3.9"
   filename      = "lambda.zip"
@@ -61,21 +61,21 @@ resource "aws_lambda_function" "example" {
   ]
 }
 
-resource "aws_sqs_queue" "whatsapp_api_queue" {
+resource "aws_sqs_queue" "queue_whatsapp_api" {
   name = "whatsapp-api-queue"
   visibility_timeout_seconds = var.timeout_seconds
 }
 
-resource "aws_lambda_permission" "allow_sqs" {
+resource "aws_lambda_permission" "allow_sqs_whatsapp_api" {
   statement_id  = "AllowSQSTrigger"
   action        = "lambda:InvokeFunction"
   principal     = "sqs.amazonaws.com"
-  source_arn    = aws_sqs_queue.whatsapp_api_queue.arn
-  function_name = aws_lambda_function.example.function_name
+  source_arn    = aws_sqs_queue.queue_whatsapp_api.arn
+  function_name = aws_lambda_function.lambda_whatsapp_api.function_name
 }
 
-resource "aws_lambda_event_source_mapping" "sqs_trigger" {
-  event_source_arn = aws_sqs_queue.whatsapp_api_queue.arn
-  function_name    = aws_lambda_function.example.arn
+resource "aws_lambda_event_source_mapping" "sqs_trigger_whatsapp_api" {
+  event_source_arn = aws_sqs_queue.queue_whatsapp_api.arn
+  function_name    = aws_lambda_function.lambda_whatsapp_api.arn
   enabled          = true
 }
