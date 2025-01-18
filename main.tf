@@ -43,6 +43,12 @@ resource "aws_iam_role_policy_attachment" "lambda_sqs_full_access_whatsapp_api" 
   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_ssm_read_only_whatsapp_api" {
+  role       = aws_iam_role.lambda_role_whatsapp_api.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+}
+
+
 resource "aws_lambda_function" "lambda_whatsapp_api" {
   function_name    = "lambda-whatsapp-api"
   role             = aws_iam_role.lambda_role_whatsapp_api.arn

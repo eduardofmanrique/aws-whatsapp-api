@@ -1,5 +1,6 @@
 import os
 import json
+import boto3
 
 from whatsapp_api.resources.messages import Messages
 
@@ -7,9 +8,12 @@ from whatsapp_api.resources.messages import Messages
 
 def handler(event, context):
 
-    whatsapp_api_token = os.getenv('WHATSAPP_API_TOKEN')
-    if not whatsapp_api_token:
-        raise Exception('Registre manualmente as chaves nas variáveis de ambiente')
+    try:
+        ssm_client = boto3.client('ssm', region_name='sa-east-1')
+        secrets = json.loads(ssm_client.get_parameter(Name="whatsapp_api_secrets")['Parameter']['Value'])
+        whatsapp_api_token = secrets['WHATSAPP_API_TOKEN']
+    except Exception as e:
+        raise Exception(f'Registre manualmente as chaves nas variáveis de ambiente - {e}')
 
     try:
         # Parse SQS message body
