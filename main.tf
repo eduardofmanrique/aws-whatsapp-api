@@ -47,3 +47,21 @@ resource "aws_lambda_function" "example" {
     "arn:aws:lambda:sa-east-1:336392948345:layer:AWSSDKPandas-Python39:29"
   ]
 }
+
+resource "aws_sqs_queue" "whatsapp_api_queue" {
+  name = "whatsapp-api-queue"
+}
+
+resource "aws_lambda_permission" "allow_sqs" {
+  statement_id  = "AllowSQSTrigger"
+  action        = "lambda:InvokeFunction"
+  principal     = "sqs.amazonaws.com"
+  source_arn    = aws_sqs_queue.whatsapp_api_queue.arn
+  function_name = aws_lambda_function.example.function_name
+}
+
+resource "aws_lambda_event_source_mapping" "sqs_trigger" {
+  event_source_arn = aws_sqs_queue.whatsapp_api_queue.arn
+  function_name    = aws_lambda_function.example.arn
+  enabled          = true
+}
