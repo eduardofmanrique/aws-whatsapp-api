@@ -43,4 +43,7 @@ resource "aws_lambda_function" "example" {
   source_code_hash = filebase64sha256("lambda.zip")
   timeout       = 120
   memory_size   = 300
+  layers        = [
+    "arn:aws:lambda:sa-east-1:336392948345:layer:AWSSDKPandas-Python39:29"
+  ]
 }
