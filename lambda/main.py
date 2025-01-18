@@ -5,7 +5,7 @@ from whatsapp_api.resources.messages import Messages
 
 
 
-def lambda_handler(event, context):
+def handler(event, context):
 
     whatsapp_api_token = os.getenv('WHATSAPP_API_TOKEN')
     if not whatsapp_api_token:
