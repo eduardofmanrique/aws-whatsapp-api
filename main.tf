@@ -65,3 +65,9 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   function_name    = aws_lambda_function.example.arn
   enabled          = true
 }
+
+resource "aws_iam_policy_attachment" "lambda_sqs_full_access" {
+  name       = "lambda-sqs-full-access-attachment"
+  roles      = [aws_iam_role.lambda_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+}
