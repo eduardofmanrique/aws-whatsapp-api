@@ -17,7 +17,7 @@ terraform {
   }
 }
 
-resource "aws_iam_role" "lambda_role_whatsapp_api" {
+resource "aws_iam_role" "lambda_role_whatsapp" {
   name               = "lambda-basic-role-whatsapp-api"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -33,23 +33,38 @@ resource "aws_iam_role" "lambda_role_whatsapp_api" {
   })
 }
 
-resource "aws_iam_policy_attachment" "lambda_basic_policy_whatsapp_api" {
-  name       = "lambda-basic-policy-attachment-whatsapp-api"
-  roles      = [aws_iam_role.lambda_role_whatsapp_api.name]
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+resource "aws_iam_role_policy_attachment" "lambda_sqs_full_access_whatsapp" {
+  role       = aws_iam_role.lambda_role_whatsapp.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 }
 
-resource "aws_iam_policy_attachment" "lambda_sqs_full_access_whatsapp_api" {
-  name       = "lambda-sqs-full-access-attachment-whatsapp-api"
-  roles      = [aws_iam_role.lambda_role_whatsapp_api.name]
+resource "aws_iam_role" "lambda_role_crypto" {
+  name               = "lambda-basic-role-crypto-report"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_sqs_full_access_crypto" {
+  role       = aws_iam_role.lambda_role_crypto.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 }
 
 
 
+
 resource "aws_lambda_function" "lambda_whatsapp_api" {
   function_name = "lambda-whatsapp-api"
-  role          = aws_iam_role.lambda_role_whatsapp_api.arn
+  role          = aws_iam_role.lambda_role_whatsapp.arn
   handler       = "main.handler"
   runtime       = "python3.9"
   filename      = "lambda.zip"
