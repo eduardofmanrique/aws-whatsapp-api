@@ -17,7 +17,7 @@ terraform {
   }
 }
 
-resource "aws_iam_role" "lambda_role_whatsapp" {
+resource "aws_iam_role" "lambda_role_whatsapp_api" {
   name               = "lambda-basic-role-whatsapp-api"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -33,48 +33,30 @@ resource "aws_iam_role" "lambda_role_whatsapp" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_sqs_full_access_whatsapp" {
-  role       = aws_iam_role.lambda_role_whatsapp.name
+resource "aws_iam_role_policy_attachment" "lambda_basic_policy_whatsapp_api" {
+  role       = aws_iam_role.lambda_role_whatsapp_api.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_sqs_full_access_whatsapp_api" {
+  role       = aws_iam_role.lambda_role_whatsapp_api.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 }
-
-resource "aws_iam_role" "lambda_role_crypto" {
-  name               = "lambda-basic-role-crypto-report"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_sqs_full_access_crypto" {
-  role       = aws_iam_role.lambda_role_crypto.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
-}
-
-
-
 
 resource "aws_lambda_function" "lambda_whatsapp_api" {
-  function_name = "lambda-whatsapp-api"
-  role          = aws_iam_role.lambda_role_whatsapp.arn
-  handler       = "main.handler"
-  runtime       = "python3.9"
-  filename      = "lambda.zip"
+  function_name    = "lambda-whatsapp-api"
+  role             = aws_iam_role.lambda_role_whatsapp_api.arn
+  handler          = "main.handler"
+  runtime          = "python3.9"
+  filename         = "lambda.zip"
   source_code_hash = filebase64sha256("lambda.zip")
-  timeout       =  var.timeout_seconds
-  memory_size   = 300
-  layers        = [
+  timeout          = var.timeout_seconds
+  memory_size      = 300
+  layers           = [
     "arn:aws:lambda:sa-east-1:336392948345:layer:AWSSDKPandas-Python39:29"
   ]
 }
+
 
 resource "aws_sqs_queue" "queue_whatsapp_api" {
   name = "whatsapp-api-queue"
