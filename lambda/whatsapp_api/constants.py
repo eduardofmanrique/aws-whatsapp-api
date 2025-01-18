@@ -1,0 +1,1 @@
+WHATSAPP_API_URL = "https://graph.facebook.com/v21.0"
