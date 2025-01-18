@@ -49,7 +49,7 @@ resource "aws_lambda_function" "lambda_whatsapp_api" {
   handler          = "main.handler"
   runtime          = "python3.9"
   filename         = "lambda.zip"
-  source_code_hash = filebase64sha256("lambda.zip")
+  source_code_hash = fileexists("lambda.zip") ? filebase64sha256("lambda.zip") : null
   timeout          = var.timeout_seconds
   memory_size      = 300
   layers           = [
