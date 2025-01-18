@@ -2,6 +2,12 @@ provider "aws" {
   region = "sa-east-1"
 }
 
+variable "timeout_seconds" {
+  description = "Timeout for both Lambda function and SQS queue (in seconds)"
+  type        = number
+  default     = 120
+}
+
 terraform {
   backend "s3" {
     bucket         = "aws-alerts-config-bucket"
@@ -41,7 +47,7 @@ resource "aws_lambda_function" "example" {
   runtime       = "python3.9"
   filename      = "lambda.zip"
   source_code_hash = filebase64sha256("lambda.zip")
-  timeout       = 120
+  timeout       =  var.timeout_seconds
   memory_size   = 300
   layers        = [
     "arn:aws:lambda:sa-east-1:336392948345:layer:AWSSDKPandas-Python39:29"
@@ -50,6 +56,7 @@ resource "aws_lambda_function" "example" {
 
 resource "aws_sqs_queue" "whatsapp_api_queue" {
   name = "whatsapp-api-queue"
+  visibility_timeout_seconds = var.timeout_seconds
 }
 
 resource "aws_lambda_permission" "allow_sqs" {
