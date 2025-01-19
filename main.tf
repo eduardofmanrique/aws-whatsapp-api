@@ -63,12 +63,6 @@ resource "aws_lambda_function" "lambda_whatsapp_api" {
   ]
 }
 
-
-resource "aws_sqs_queue" "queue_whatsapp_api" {
-  name = "whatsapp-api-queue"
-  visibility_timeout_seconds = var.timeout_seconds
-}
-
 resource "aws_lambda_permission" "allow_sqs_whatsapp_api" {
   statement_id  = "AllowSQSTrigger"
   action        = "lambda:InvokeFunction"
@@ -81,4 +75,17 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger_whatsapp_api" {
   event_source_arn = aws_sqs_queue.queue_whatsapp_api.arn
   function_name    = aws_lambda_function.lambda_whatsapp_api.arn
   enabled          = true
+}
+
+resource "aws_sqs_queue" "dlq_whatsapp_api" {
+  name = "whatsapp-api-dlq"
+}
+
+resource "aws_sqs_queue" "queue_whatsapp_api" {
+  name                       = "whatsapp-api-queue"
+  visibility_timeout_seconds = var.timeout_seconds
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.dlq_whatsapp_api.arn
+    maxReceiveCount     = 1
+  })
 }
