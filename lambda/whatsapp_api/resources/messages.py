@@ -64,3 +64,29 @@ class Messages(WhatsAppApiHandler):
             headers={'Content-Type': "application/json"}
         )
         return r.json()
+
+    def send_document_message(self,
+                              to: str,
+                              base64_document: str,
+                              document_filename: str,
+                              caption: str,
+                              recipient_type: str = 'individual'):
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": to,
+            "recipient_type": recipient_type,
+            "type": "document",
+            "document": {
+                "id": self.__base64_to_media(base64_document),
+                "caption": caption,
+                "filename": document_filename
+            }
+        }
+        r = self.handle_request(
+            method='POST',
+            endpoint=f'/{self.resource_name}',
+            timeout=2.5,
+            json=payload,
+            headers={'Content-Type': "application/json"}
+        )
+        return r.json()
