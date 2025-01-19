@@ -39,11 +39,15 @@ def handler(event, context):
                 print(f"Function executed successfully: {response}")
             else:
                 raise Exception(f"Function {resource_function} not found on resource {resource_name}")
-
+        return {
+            'statusCode': 200
+        }
     except Exception as e:
         print(f"Error processing SQS message: {e}")
-        raise
+        return {
+            'statusCode': 400,
+            'message': f'Error - {e}'
+        }
 
 if __name__ == "__main__":
     pass
-
