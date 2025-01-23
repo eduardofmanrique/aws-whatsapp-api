@@ -19,9 +19,9 @@ class Messages(WhatsAppApiHandler):
         )
         return r.json()
 
-    def __base64_to_media(self, base64: str):
+    def __base64_to_media(self, base64: str, content_type:str = 'application/pdf'):
         media_obj = Media(self._token, self._id)
-        return media_obj.upload(base64_str=base64, content_type='application/pdf')['id']
+        return media_obj.upload(base64_str=base64, content_type=content_type)['id']
 
     def send_template_message(self,
                               to: str,
@@ -82,6 +82,35 @@ class Messages(WhatsAppApiHandler):
                 "filename": document_filename
             }
         }
+        r = self.handle_request(
+            method='POST',
+            endpoint=f'/{self.resource_name}',
+            timeout=2.5,
+            json=payload,
+            headers={'Content-Type': "application/json"}
+        )
+        return r.json()
+
+    def send_image_message(self,
+                           to: str,
+                           base64_image: str = None,
+                           link: str = None,
+                           caption: str = None,
+                           content_type: str = "image/jpeg"):
+        if not base64_image and not link:
+            raise Exception("link or id of image is necessary")
+
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": to,
+            "type": "image",
+            "image": {"link": link} if link else {"id": self.__base64_to_media(base64_image, content_type=content_type)}
+        }
+
+        if caption:
+            payload["image"]["caption"] = caption
+
         r = self.handle_request(
             method='POST',
             endpoint=f'/{self.resource_name}',
