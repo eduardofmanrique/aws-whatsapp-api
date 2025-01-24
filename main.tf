@@ -84,6 +84,7 @@ resource "aws_sqs_queue" "dlq_whatsapp_api" {
 resource "aws_sqs_queue" "queue_whatsapp_api" {
   name                       = "whatsapp-api-queue"
   visibility_timeout_seconds = var.timeout_seconds
+  receive_wait_time_seconds  = 20
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq_whatsapp_api.arn
     maxReceiveCount     = 1
